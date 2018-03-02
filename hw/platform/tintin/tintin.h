@@ -34,13 +34,6 @@ uint8_t *hw_display_get_buffer(void);
 void hw_watchdog_init();
 void hw_watchdog_reset();
 
-void rtc_init();
-void rtc_config();
-void hw_get_time_str(char *buf);
-struct tm *hw_get_time(void);
-void rtc_set_timer_interval(TimeUnits tick_units);
-void rtc_disable_timer_interval(void);
-
 void hw_vibrate_init();
 void hw_vibrate_enable(uint8_t enabled);
 

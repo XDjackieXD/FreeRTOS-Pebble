@@ -19,7 +19,6 @@
 #include "rebbleos.h"
 
 #include "stm32_power.h"
-#include "stm32_rtc.h"
 
 // extern void *strcpy(char *a2, const char *a1);
 
