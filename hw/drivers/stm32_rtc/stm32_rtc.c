@@ -146,6 +146,22 @@ struct tm *hw_get_time(void)
     return &time_now;
 }
 
+void hw_set_time(struct tm *time_now)
+{
+    RTC_TimeTypeDef RTC_TimeStructure;
+    RTC_DateTypeDef RTC_DateStructure;
+
+    RTC_DateStructure.RTC_Year = time_now->tm_year - 2000 + 1900; // idk why but get_time does it too...
+    RTC_DateStructure.RTC_Month = time_now->tm_mon + 1; // same applies to this offset
+    RTC_DateStructure.RTC_Date = time_now->tm_mday;
+    RTC_TimeStructure.RTC_Hours = time_now->tm_hour;
+    RTC_TimeStructure.RTC_Minutes = time_now->tm_min;
+    RTC_TimeStructure.RTC_Seconds = time_now->tm_sec;
+
+    RTC_SetTime(RTC_Format_BIN, &RTC_TimeStructure);
+    RTC_SetDate(RTC_Format_BIN, &RTC_DateStructure);
+}
+
 void hw_set_alarm(struct tm alarm)
 {
 //     RTC_AlarmStructure.RTC_AlarmTime.RTC_H12     = RTC_H12_AM;
@@ -162,23 +178,6 @@ void hw_set_alarm(struct tm alarm)
 //     RTC_AlarmCmd(RTC_Alarm_A, ENABLE);
 //     RTC_ClearFlag(RTC_FLAG_ALRAF);
 }
-
-void hw_set_date_time(struct tm date_time)
-{
-//     RTC_DateStructure.RTC_Year = 0x13;
-//     RTC_DateStructure.RTC_Month = RTC_Month_January;
-//     RTC_DateStructure.RTC_Date = 0x11;
-//     RTC_DateStructure.RTC_WeekDay = RTC_Weekday_Saturday;
-//     RTC_SetDate(RTC_Format_BCD, &RTC_DateStructure);
-//
-//     RTC_TimeStructure.RTC_H12     = RTC_H12_AM;
-//     RTC_TimeStructure.RTC_Hours   = 0x05;
-//     RTC_TimeStructure.RTC_Minutes = 0x20;
-//     RTC_TimeStructure.RTC_Seconds = 0x00;
-//
-//     RTC_SetTime(RTC_Format_BCD, &RTC_TimeStructure);
-}
-
 
 void RTC_WKUP_IRQHandler(void)
 {

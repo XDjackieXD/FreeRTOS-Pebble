@@ -8,18 +8,13 @@
 #include "rebbleos.h"
 #include "strftime.h"
 
-static TickType_t _boot_ticks;
-static time_t _boot_time_t;
+static TickType_t _sync_ticks;
+static time_t _sync_time_t;
+
 
 void rcore_time_init(void)
 {
-    struct tm *tm;
-    
-    /* Read the time out of the RTC, then convert to a time_t (ugh!), then
-     * begin offsetting ticks in ms from there.  */
-    _boot_ticks = xTaskGetTickCount();
-    tm = hw_get_time();
-    _boot_time_t = rcore_mktime(tm);
+    _sync_time_rtc();
 }
 
 time_t rcore_mktime(struct tm *tm)
@@ -34,16 +29,16 @@ void rcore_localtime(struct tm *tm, time_t time)
 
 void rcore_time_ms(time_t *tutc, uint16_t *ms)
 {
-    TickType_t ticks_since_boot = xTaskGetTickCount() - _boot_ticks;
+    TickType_t ticks_since_sync = xTaskGetTickCount() - _sync_ticks;
     
-    *tutc = _boot_time_t + ticks_since_boot / configTICK_RATE_HZ;
-    *ms = (ticks_since_boot % configTICK_RATE_HZ) * 1000 / configTICK_RATE_HZ;
+    *tutc = _sync_time_t + ticks_since_sync / configTICK_RATE_HZ;
+    *ms = (ticks_since_sync % configTICK_RATE_HZ) * 1000 / configTICK_RATE_HZ;
 }
 
 TickType_t rcore_time_to_ticks(time_t t, uint16_t ms) {
-    if (t < _boot_time_t)
+    if (t < _sync_time_t)
         return 0;
-    return (t - _boot_time_t) * configTICK_RATE_HZ + pdMS_TO_TICKS(ms);
+    return (t - _sync_time_t) * configTICK_RATE_HZ + pdMS_TO_TICKS(ms);
 }
 
 size_t rcore_strftime(char* buffer, size_t maxSize, const char* format, const struct tm* tm) {
@@ -62,6 +57,30 @@ struct tm *rebble_time_get_tm(void)
     rcore_localtime(&_global_tm, tm);
     return &_global_tm;
 }
+
+// Sync time and set RTC
+void rebble_time_set_tm(struct tm *time_now)
+{
+    _sync_ticks = xTaskGetTickCount();
+    _sync_time_t = rcore_mktime(time_now);
+
+    hw_set_time(time_now);
+}
+
+// Read the current time from the RTC
+void _sync_time_rtc(void)
+{
+    struct tm *tm;
+
+    /* Read the time out of the RTC, then convert to a time_t (ugh!), then
+     * begin offsetting ticks in ms from there.  */
+    _sync_ticks = xTaskGetTickCount();
+    tm = hw_get_time();
+    _sync_time_t = rcore_mktime(tm);
+}
+
+
+
 
 uint16_t pbl_time_deprecated(time_t *tloc)
 {

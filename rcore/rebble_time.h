@@ -26,8 +26,10 @@ void rcore_localtime(struct tm *tm, time_t time);
 void rcore_time_ms(time_t *tutc, uint16_t *ms);
 TickType_t rcore_time_to_ticks(time_t t, uint16_t ms);
 size_t rcore_strftime(char* buffer, size_t maxSize, const char* format, const struct tm* tm);
+void rebble_time_set_tm(struct tm *time_now);
 
 // private
+void _sync_time_rtc(void);
 struct tm *rebble_time_get_tm(void);
 int pbl_clock_is_24h_style();
 uint16_t pbl_time_deprecated(time_t *tloc);
